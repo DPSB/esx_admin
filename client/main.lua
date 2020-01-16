@@ -1,8 +1,9 @@
 ESX = nil
 local PlayerData, GUI, CurrentActionData = {}, {}, {}
-GUI.Time, secondsRemaining = 0, 0
+GUI.Time = 0
 local hasAlreadyEnteredMarker, BrinksSpawn = false, false
 local lastZone, CurrentAction, CurrentActionMsg
+local secondsRemaining = 0
 
 -- SetMaxWantedLevel(5)
 Citizen.CreateThread(function()
