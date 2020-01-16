@@ -1,26 +1,8 @@
-local Keys = {
-	["ESC"] = 322, ["F1"] = 288, ["F2"] = 289, ["F3"] = 170, ["F5"] = 166, ["F6"] = 167, ["F7"] = 168, ["F8"] = 169, ["F9"] = 56, ["F10"] = 57, 
-	["~"] = 243, ["1"] = 157, ["2"] = 158, ["3"] = 160, ["4"] = 164, ["5"] = 165, ["6"] = 159, ["7"] = 161, ["8"] = 162, ["9"] = 163, ["-"] = 84, ["="] = 83, ["BACKSPACE"] = 177, 
-	["TAB"] = 37, ["Q"] = 44, ["W"] = 32, ["E"] = 38, ["R"] = 45, ["T"] = 245, ["Y"] = 246, ["U"] = 303, ["P"] = 199, ["["] = 39, ["]"] = 40, ["ENTER"] = 18,
-	["CAPS"] = 137, ["A"] = 34, ["S"] = 8, ["D"] = 9, ["F"] = 23, ["G"] = 47, ["H"] = 74, ["K"] = 311, ["L"] = 182,
-	["LEFTSHIFT"] = 21, ["Z"] = 20, ["X"] = 73, ["C"] = 26, ["V"] = 0, ["B"] = 29, ["N"] = 249, ["M"] = 244, [","] = 82, ["."] = 81,
-	["LEFTCTRL"] = 36, ["LEFTALT"] = 19, ["SPACE"] = 22, ["RIGHTCTRL"] = 70, 
-	["HOME"] = 213, ["PAGEUP"] = 10, ["PAGEDOWN"] = 11, ["DELETE"] = 178,
-	["LEFT"] = 174, ["RIGHT"] = 175, ["TOP"] = 27, ["DOWN"] = 173,
-	["NENTER"] = 201, ["N4"] = 108, ["N5"] = 60, ["N6"] = 107, ["N+"] = 96, ["N-"] = 97, ["N7"] = 117, ["N8"] = 61, ["N9"] = 118
-}
-
-ESX                           = nil
-local PlayerData              = {}
-local GUI                     = {}
-GUI.Time                      = 0
-local hasAlreadyEnteredMarker = false
-local lastZone                = nil
-local CurrentAction           = nil
-local CurrentActionMsg        = ''
-local CurrentActionData       = {}
-local BrinksSpawn			  = false
-local secondsRemaining 		  = 0
+ESX = nil
+local PlayerData, GUI, CurrentActionData = {}, {}, {}
+GUI.Time, secondsRemaining = 0, 0
+local hasAlreadyEnteredMarker, BrinksSpawn = false, false
+local lastZone, CurrentAction, CurrentActionMsg
 
 -- SetMaxWantedLevel(5)
 Citizen.CreateThread(function()
@@ -38,8 +20,8 @@ AddEventHandler('esx:playerLoaded', function(xPlayer)
 end)
 
 function isSteamIdInList(psteamId)
-
     local steamIdIsFound = false
+
     for i=1, #Config.SteamID, 1 do
 		if Config.SteamID[i] == psteamId then
 			return true
@@ -49,9 +31,7 @@ function isSteamIdInList(psteamId)
     return false
 end
 
-
 function OpenAccountantActionsMenu()
-
 	local elements = {
 	{label = _U('Player'), 			value = 'customers'},
 	{label = _U('Society'),			value = 'customers_entreprise'},
@@ -65,13 +45,10 @@ function OpenAccountantActionsMenu()
 
 	ESX.UI.Menu.CloseAll()
 
-	ESX.UI.Menu.Open(
-		'default', GetCurrentResourceName(), 'accountant_actions',
-		{
+	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'accountant_actions', {
 			title    = _U('Menu'),
 			elements = elements
-		},
-		function(data, menu)
+		}, function(data, menu)
 
 			if data.current.value == 'customers' then
 				OpenCustomersMenu()
@@ -90,61 +67,44 @@ function OpenAccountantActionsMenu()
 				
 					ESX.UI.Menu.CloseAll()
 				
-					ESX.UI.Menu.Open(
-						'default', GetCurrentResourceName(), 'accountant_actions',
-						{
+					ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'accountant_actions', {
 							title    = _U('CreateAlert'),
 							elements = elements
-						},
-						function(data, menu)
+						}, function(data, menu)
 							if data.current.value == 'police' then
-								ESX.UI.Menu.Open(
-									'dialog', GetCurrentResourceName(), 'customer_withdraw_amount',
-									{
+								ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_withdraw_amount', {
 										title = 'Alert Police'
-									},
-									function(data2, menu)
+									}, function(data2, menu)
 				
 										local text = tostring(data2.value)								
 										menu.close()	
 				
 										TriggerServerEvent('esx_admin:policealert', text)
 										ESX.ShowNotification(_U('SendPolice') ..text.. _U('Send'))
-									end,
-									function(data2, menu)
+									end, function(data2, menu)
 										menu.close()
-									end
-								)			
+									end)			
 							end 
 
 							if data.current.value == 'gang' then
-								ESX.UI.Menu.Open(
-									'dialog', GetCurrentResourceName(), 'customer_withdraw_amount',
-									{
+								ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_withdraw_amount', {
 										title = _U('AlertG')
-									},
-									function(data2, menu)
+									}, function(data2, menu)
 
 										local text = tostring(data2.value)								
 										menu.close()	
 
 										TriggerServerEvent('esx_admin:gangalert', text)
 										ESX.ShowNotification(_U('SendPolice') ..text.. _U('Send'))
-
-									end,
-									function(data2, menu)
+									end, function(data2, menu)
 										menu.close()
-									end
-								)						
+									end)						
 							end 
 
 							if data.current.value == 'police_gang' then
-								ESX.UI.Menu.Open(
-									'dialog', GetCurrentResourceName(), 'customer_withdraw_amount',
-									{
+								ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_withdraw_amount', {
 										title = _U('AlertPG')
-									},
-									function(data2, menu)
+									}, function(data2, menu)
 
 										local text = tostring(data2.value)								
 										menu.close()	
@@ -152,41 +112,28 @@ function OpenAccountantActionsMenu()
 										TriggerServerEvent('esx_admin:gangalert', text)
 										TriggerServerEvent('esx_admin:policealert', text)
 										ESX.ShowNotification(_U('SendPoliceGang') ..text.. _U('Send'))
-
-									end,
-									function(data2, menu)
+									end, function(data2, menu)
 										menu.close()
-									end
-								)						
+									end)						
 							end 
-						end,
-						function(data, menu)
+						end, function(data, menu)
 							menu.close()
-						end
-					)
-
+						end)
 			end
 
-
 			if data.current.value == 'pickup' then
-				ESX.UI.Menu.Open(
-					'dialog', GetCurrentResourceName(), 'customer_withdraw_amount',
-					{
+				ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_withdraw_amount', {
 						title = _U('PickUp')
-					},
-					function(data2, menu)
+					}, function(data2, menu)
 
 						local item = tostring(data2.value)								
 						menu.close()	
 
 						TriggerServerEvent('esx_admin:pickup', item)
 						ESX.ShowNotification('~b~Item : ~w~' .. item .. " posé au sol" )
-
-					end,
-					function(data2, menu)
+					end, function(data2, menu)
 						menu.close()
-					end
-				)
+					end)
 			end
 
 			if data.current.value == 'brinks' then
@@ -197,13 +144,10 @@ function OpenAccountantActionsMenu()
 				
 					ESX.UI.Menu.CloseAll()
 				
-					ESX.UI.Menu.Open(
-						'default', GetCurrentResourceName(), 'accountant_actions',
-						{
+					ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'accountant_actions', {
 							title    = _U('Menu'),
 							elements = elements
-						},
-						function(data, menu)
+						}, function(data, menu)
 
 							if data.current.value == 'no' then
 								local carid = GetHashKey('Stockade')
@@ -237,13 +181,10 @@ function OpenAccountantActionsMenu()
 								
 									ESX.UI.Menu.CloseAll()
 								
-									ESX.UI.Menu.Open(
-										'default', GetCurrentResourceName(), 'accountant_actions',
-										{
+									ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'accountant_actions', {
 											title    = 'Brinks',
 											elements = elements
-										},
-										function(data, menu)
+										}, function(data, menu)
 
 											if data.current.value == 'start' then
 												TriggerEvent('esx_admin:going')
@@ -258,22 +199,13 @@ function OpenAccountantActionsMenu()
 												TriggerServerEvent('esx_admin:addInventoryItem', GetVehicleClass(plyCar), GetDisplayNameFromVehicleModel(GetEntityModel(plyCar)), GetVehicleNumberPlateText(plyCar), "pack_drugs", "-1", "Mallette traçable")						
 												TaskGoToCoordAnyMeans(startped, 999,999,999, 5.0, 0, 0, 786603, 0xbf800000)           
 											end			
-				
-										end,
-										function(data, menu)
+										end, function(data, menu)
 											menu.close()
-										end
-									)
-								
+										end)
 							end
-
-
-						end,
-						function(data, menu)
+						end, function(data, menu)
 							menu.close()
-						end
-					)
-
+						end)
 			end
 
 			if data.current.value == 'coffre' then
@@ -286,13 +218,11 @@ function OpenAccountantActionsMenu()
 				
 					ESX.UI.Menu.CloseAll()
 				
-					ESX.UI.Menu.Open(
-						'default', GetCurrentResourceName(), 'accountant_actions',
-						{
+					ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'accountant_actions', {
 							title    = 'Coffre',
 							elements = elements
-						},
-						function(data, menu)
+						}, function(data, menu)
+
 							if data.current.value == 'put_stock' then
 								OpenPutStocksMenu()		
 							end 
@@ -308,17 +238,12 @@ function OpenAccountantActionsMenu()
 							if data.current.value == 'put_weapon' then
 								OpenPutWeaponMenu()
 							end
-
-						end,
-						function(data, menu)
+						end, function(data, menu)
 							menu.close()
-						end
-					)
-
+						end)
 			end
 
 			if data.current.value == 'autogive' then
-
 				local elements = {
 					{label = 'Avoir une arme', 		value = 'giveweapon'},
 					{label = 'Avoir argent sale', 	value = 'giveblackmoney'},
@@ -328,99 +253,68 @@ function OpenAccountantActionsMenu()
 				
 					ESX.UI.Menu.CloseAll()
 				
-					ESX.UI.Menu.Open(
-						'default', GetCurrentResourceName(), 'accountant_actions',
-						{
+					ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'accountant_actions', {
 							title    = 'Auto Give',
 							elements = elements
-						},
-						function(data, menu)
+						}, function(data, menu)
 							if data.current.value == 'giveweapon' then
-								ESX.UI.Menu.Open(
-									'dialog', GetCurrentResourceName(), 'customer_withdraw_amount',
-									{
+								ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_withdraw_amount', {
 										title = 'Arme'
-									},
-									function(data2, menu)
+									}, function(data2, menu)
 
 										local text = tostring(data2.value)								
 										menu.close()	
 
 										TriggerServerEvent('esx_admin:giveweapon', text)
-
-									end,
-									function(data2, menu)
+									end, function(data2, menu)
 										menu.close()
-									end
-								)
+									end)
 							end 
 
 							if data.current.value == 'giveblackmoney' then
-								ESX.UI.Menu.Open(
-									'dialog', GetCurrentResourceName(), 'customer_withdraw_amount',
-									{
+								ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_withdraw_amount', {
 										title = 'Argent Sale'
-									},
-									function(data2, menu)
+									}, function(data2, menu)
 
 										local amount = tonumber(data2.value)								
 										menu.close()	
 
 										TriggerServerEvent('esx_admin:customerdirtDeposit', amount)
-
-									end,
-									function(data2, menu)
+									end, function(data2, menu)
 										menu.close()
-									end
-								)
+									end)
 							end 
 
 							if data.current.value == 'givemoney' then
-								ESX.UI.Menu.Open(
-									'dialog', GetCurrentResourceName(), 'customer_withdraw_amount',
-									{
+								ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_withdraw_amount', {
 										title = 'Argent propre'
-									},
-									function(data2, menu)
+									}, function(data2, menu)
 
 										local amount = tonumber(data2.value)								
 										menu.close()	
 
 										TriggerServerEvent('esx_admin:customerDeposit', amount)
-
-									end,
-									function(data2, menu)
+									end, function(data2, menu)
 										menu.close()
-									end
-								)
+									end)
 							end
 				
 							if data.current.value == 'giveitem' then
-								ESX.UI.Menu.Open(
-									'dialog', GetCurrentResourceName(), 'customer_withdraw_amount',
-									{
+								ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_withdraw_amount', {
 										title = 'Item'
-									},
-									function(data2, menu)
+									}, function(data2, menu)
 
 										local item = tostring(data2.value)								
 										menu.close()	
 
 										TriggerServerEvent('esx_admin:additem', item)
-
-									end,
-									function(data2, menu)
+									end, function(data2, menu)
 										menu.close()
-									end
-								)
+									end)
 							end
-
-						end,
-						function(data, menu)
+						end, function(data, menu)
 							menu.close()
-						end
-					)
-
+						end)
 			end
 
 			if data.current.value == 'npc_gang' then
@@ -444,15 +338,10 @@ function OpenAccountantActionsMenu()
 				SetPedArmour(playerPed, math.random(50, 100))
 				SetPedCombatRange(dmvmainped, 0)
 			end
-
-		end,
-		function(data, menu)
+		end, function(data, menu)
 			menu.close()
-		end
-	)
-
+		end)
 end
-
 
 function OpenStocksMenu()
 
@@ -466,22 +355,16 @@ function OpenStocksMenu()
 			table.insert(elements, {label = 'x' .. items[i].count .. ' ' .. items[i].label, value = items[i].name})
 		end
 
-	  ESX.UI.Menu.Open(
-	    'default', GetCurrentResourceName(), 'stocks_menu',
-	    {
+	  ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'stocks_menu', {
 	      title    = 'Coffre Admin',
 	      elements = elements
-	    },
-	    function(data, menu)
+	    }, function(data, menu)
 
 	    	local itemName = data.current.value
 
-				ESX.UI.Menu.Open(
-					'dialog', GetCurrentResourceName(), 'stocks_menu_get_item_count',
-					{
+				ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'stocks_menu_get_item_count', {
 						title = 'Quantité'
-					},
-					function(data2, menu2)
+					}, function(data2, menu2)
 
 						local count = tonumber(data2.value)
 
@@ -494,21 +377,13 @@ function OpenStocksMenu()
 
 							TriggerServerEvent('esx_admin:getStockItem', itemName, count)
 						end
-
-					end,
-					function(data2, menu2)
+					end, function(data2, menu2)
 						menu2.close()
-					end
-				)
-
-	    end,
-	    function(data, menu)
+					end)
+	    end, function(data, menu)
 	    	menu.close()
-	    end
-	  )
-
+	    end)
 	end)
-
 end
 
 function OpenPutStocksMenu()
@@ -524,25 +399,18 @@ function OpenPutStocksMenu()
 			if item.count > 0 then
 				table.insert(elements, {label = item.label .. ' x' .. item.count, type = 'item_standard', value = item.name})
 			end
-
 		end
 
-	  ESX.UI.Menu.Open(
-	    'default', GetCurrentResourceName(), 'stocks_menu',
-	    {
+	  ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'stocks_menu', {
 	      title    = 'Coffre Admin',
 	      elements = elements
-	    },
-	    function(data, menu)
+	    }, function(data, menu)
 
 	    	local itemName = data.current.value
 
-				ESX.UI.Menu.Open(
-					'dialog', GetCurrentResourceName(), 'stocks_menu_put_item_count',
-					{
+				ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'stocks_menu_put_item_count', {
 						title = 'Quantité'
-					},
-					function(data2, menu2)
+					}, function(data2, menu2)
 
 						local count = tonumber(data2.value)
 
@@ -555,21 +423,13 @@ function OpenPutStocksMenu()
 
 							TriggerServerEvent('esx_admin:putStockItems', itemName, count)
 						end
-
-					end,
-					function(data2, menu2)
+					end, function(data2, menu2)
 						menu2.close()
-					end
-				)
-
-	    end,
-	    function(data, menu)
+					end)
+	    end, function(data, menu)
 	    	menu.close()
-	    end
-	  )
-
+	    end)
 	end)
-
 end
 
 function OpenGetWeaponMenu()
@@ -584,29 +444,21 @@ function OpenGetWeaponMenu()
 			end
 		end
 
-		ESX.UI.Menu.Open(
-			'default', GetCurrentResourceName(), 'armory_get_weapon',
-			{
+		ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'armory_get_weapon', {
 				title    = "Déposer une arme",
 				align    = 'top-left',
 				elements = elements,
-			},
-			function(data, menu)
+			}, function(data, menu)
 
 				menu.close()
 
 				ESX.TriggerServerCallback('esx_admin:removeArmoryWeapon', function()
 					OpenGetWeaponMenu()
 				end, data.current.value)
-
-			end,
-			function(data, menu)
+			end, function(data, menu)
 				menu.close()
-			end
-		)
-		
+			end)
 	end)
-
 end
 
 function OpenPutWeaponMenu()
@@ -623,32 +475,23 @@ function OpenPutWeaponMenu()
 			local ammo = GetAmmoInPedWeapon(playerPed, weaponHash)
 			table.insert(elements, {label = weaponList[i].label, value = weaponList[i].name})
 		end
-
 	end
 
-	ESX.UI.Menu.Open(
-		'default', GetCurrentResourceName(), 'armory_put_weapon',
-		{
+	ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'armory_put_weapon', {
 			title    = "Prend une arme",
 			align    = 'top-left',
 			elements = elements,
-		},
-		function(data, menu)
+		}, function(data, menu)
 			
 			menu.close()
 
 			ESX.TriggerServerCallback('esx_admin:addArmoryWeapon', function()
 				OpenPutWeaponMenu()
 			end, data.current.value)
-
-		end,
-		function(data, menu)
+		end, function(data, menu)
 			menu.close()
-		end
-	)
-
+		end)
 end
-
 
 function SpawnVehiclePolice()
 
@@ -663,9 +506,7 @@ function SpawnVehiclePolice()
 
 	vehpolice = CreateVehicle(police,coords.x +18, coords.y+18, coords.z -1, 210, true, true)
 	vehpolice = CreateVehicle(police,coords.x +14, coords.y+14, coords.z -1, 210, true, true)
-
 end 
-
 
 function OpenDoors ()
 
@@ -686,7 +527,6 @@ function OpenDoors ()
 	-- Acive Alarme vehicule
 	SetVehicleAlarm(veh, true)
 	StartVehicleAlarm(veh)
-
 end
 
 function StartFire()
@@ -748,8 +588,7 @@ function OpenCustomersEntreprise()
 			})
 		end
 
-		ESX.UI.Menu.Open(
-			'list', GetCurrentResourceName(), 'customers',
+		ESX.UI.Menu.Open('list', GetCurrentResourceName(), 'customers',
 			elements,
 			function(data, menu)
 
@@ -759,12 +598,9 @@ function OpenCustomersEntreprise()
 
 					menu.close()
 
-					ESX.UI.Menu.Open(
-						'dialog', GetCurrentResourceName(), 'customer_deposit_amount',
-						{
+					ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_deposit_amount', {
 							title = _U('amount')
-						},
-						function(data2, menu)
+						}, function(data2, menu)
 
 							local amount = tonumber(data2.value)
 
@@ -775,27 +611,19 @@ function OpenCustomersEntreprise()
 								menu.close()	
 
 								TriggerServerEvent('esx_accountantjob:customerDeposit', customer.society.account, amount)
-
 							end
-
-						end,
-						function(data2, menu)
+						end, function(data2, menu)
 							menu.close()
-						end
-					)
-
+						end)
 				end
 
 				if data.value == 'withdraw' then
 
 					menu.close()
 
-					ESX.UI.Menu.Open(
-						'dialog', GetCurrentResourceName(), 'customer_withdraw_amount',
-						{
+					ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_withdraw_amount', {
 							title = _U('amount')
-						},
-						function(data2, menu)
+						}, function(data2, menu)
 
 							local amount = tonumber(data2.value)
 
@@ -807,23 +635,14 @@ function OpenCustomersEntreprise()
 
 								TriggerServerEvent('esx_accountantjob:customerWithdraw', customer.society.account, amount)
 							end
-
-						end,
-						function(data2, menu)
+						end, function(data2, menu)
 							menu.close()
-						end
-					)
-
+						end)
 				end
-
-			end,
-			function(data, menu)
+			end, function(data, menu)
 				menu.close()
-			end
-		)
-
+			end)
 	end)
-
 end
 
 function OpenCustomersMenu()
@@ -851,14 +670,11 @@ function OpenCustomersMenu()
 					'{{ check inventaire |CheckInventaire}}',
 					'{{ Item |additem}}',
 					'{{ Status |addstatus}}',
-	
-
 				}
 			})
 		end
 
-		ESX.UI.Menu.Open(
-			'list', GetCurrentResourceName(), 'customers',
+		ESX.UI.Menu.Open('list', GetCurrentResourceName(), 'customers',
 			elements,
 			function(data, menu)
 
@@ -868,12 +684,9 @@ function OpenCustomersMenu()
 
 					menu.close()
 
-					ESX.UI.Menu.Open(
-						'dialog', GetCurrentResourceName(), 'customer_deposit_amount',
-						{
+					ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_deposit_amount', {
 							title = _U('amount')
-						},
-						function(data2, menu)
+						}, function(data2, menu)
 
 							local amount = tonumber(data2.value)
 
@@ -886,28 +699,20 @@ function OpenCustomersMenu()
 								TriggerServerEvent('esx_admin:customerDeposit', customer.name, amount)
 
 								OpenCustomersMenu()
-
 							end
-
-						end,
-						function(data2, menu)
+						end, function(data2, menu)
 							menu.close()
 							OpenCustomersMenu()
-						end
-					)
-
+						end)
 				end
 
 				if data.value == 'depositaccount' then
 
 					menu.close()
 
-					ESX.UI.Menu.Open(
-						'dialog', GetCurrentResourceName(), 'customer_withdraw_amount',
-						{
+					ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_withdraw_amount', {
 							title = _U('amount')
-						},
-						function(data2, menu)
+						}, function(data2, menu)
 
 							local amount = tonumber(data2.value)
 
@@ -920,28 +725,20 @@ function OpenCustomersMenu()
 								TriggerServerEvent('esx_admin:customeraccount', customer.name, amount)
 
 								OpenCustomersMenu()
-
 							end
-
-						end,
-						function(data2, menu)
+						end, function(data2, menu)
 							menu.close()
 							OpenCustomersMenu()
-						end
-					)
-
+						end)
 				end
 
 				if data.value == 'depositdirt' then
 
 					menu.close()
 
-					ESX.UI.Menu.Open(
-						'dialog', GetCurrentResourceName(), 'customer_deposit_amount',
-						{
+					ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_deposit_amount', {
 							title = _U('amount')
-						},
-						function(data2, menu)
+						}, function(data2, menu)
 
 							local amount = tonumber(data2.value)
 
@@ -954,28 +751,20 @@ function OpenCustomersMenu()
 								TriggerServerEvent('esx_admin:customerdirtDeposit', customer.name, amount)
 
 								OpenCustomersMenu()
-
 							end
-
-						end,
-						function(data2, menu)
+						end, function(data2, menu)
 							menu.close()
 							OpenCustomersMenu()
-						end
-					)
-
+						end)
 				end
 
 				if data.value == 'dirtwithdraw' then
 
 					menu.close()
 
-					ESX.UI.Menu.Open(
-						'dialog', GetCurrentResourceName(), 'customer_withdraw_amount',
-						{
+					ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_withdraw_amount', {
 							title = _U('amount')
-						},
-						function(data2, menu)
+						}, function(data2, menu)
 
 							local amount = tonumber(data2.value)
 
@@ -988,16 +777,11 @@ function OpenCustomersMenu()
 								TriggerServerEvent('esx_admin:customerdirtWithdraw', customer.name, amount)
 
 								OpenCustomersMenu()
-
 							end
-
-						end,
-						function(data2, menu)
+						end, function(data2, menu)
 							menu.close()
 							OpenCustomersMenu()
-						end
-					)
-
+						end)
 				end
 
 				if data.value == 'CheckInventaire' then
@@ -1008,66 +792,45 @@ function OpenCustomersMenu()
 				if data.value == 'additem' then
 					menu.close()
 
-					ESX.UI.Menu.Open(
-						'dialog', GetCurrentResourceName(), 'customer_withdraw_amount',
-						{
+					ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_withdraw_amount', {
 							title = _U('GiveOneItem')
-												},
-						function(data2, menu)
+						}, function(data2, menu)
 
 							local item = tostring(data2.value)								
 							menu.close()	
 
 							TriggerServerEvent('esx_admin:additem', customer.name, item)
-
-						end,
-						function(data2, menu)
+						end, function(data2, menu)
 							menu.close()
 							OpenCustomersMenu()
-						end
-					)
-
+						end)
 				end
 
 				if data.value == 'addstatus' then
 					menu.close()
 
-					ESX.UI.Menu.Open(
-						'dialog', GetCurrentResourceName(), 'customer_withdraw_amount',
-						{
+					ESX.UI.Menu.Open('dialog', GetCurrentResourceName(), 'customer_withdraw_amount', {
 							title = 'status'
-						},
-						function(data2, menu)
+						}, function(data2, menu)
 
 							local amount = tostring(data2.value)								
 							menu.close()	
 
 							TriggerServerEvent('esx_admin:addstatus', customer.name, amount)
-
-						end,
-						function(data2, menu)
+						end, function(data2, menu)
 							menu.close()
 							OpenCustomersMenu()
-						end
-					)
-
+						end)
 				end
-
-			end,
-			function(data, menu)
+			end, function(data, menu)
 				menu.close()
-			end
-		)
-
+			end)
 	end)
-
 end
-
 
 function OpenCustomersInventaire()
 
 	ESX.TriggerServerCallback('esx_policejob:getOtherPlayerData', function(data)
-
 		local elements = {}
 
 		table.insert(elements, {label = _U('Weapon'), value = nil})
@@ -1094,14 +857,11 @@ function OpenCustomersInventaire()
 			end
 		end
 		
-		ESX.UI.Menu.Open(
-			'default', GetCurrentResourceName(), 'body_search',
-			{
+		ESX.UI.Menu.Open('default', GetCurrentResourceName(), 'body_search', {
 				title    = _U('invetor'),
 				align    = 'top-left',
 				elements = elements,
-			},
-			function(data, menu)
+			}, function(data, menu)
 
 				local itemType = data.current.itemType
 				local itemName = data.current.value
@@ -1112,18 +872,11 @@ function OpenCustomersInventaire()
 					TriggerServerEvent('esx_admin:confiscatePlayerItem', GetPlayerServerId(player), itemType, itemName, amount)
 
 					OpenBodySearchMenu(player)
-
 				end
-
-			end,
-			function(data, menu)
+			end, function(data, menu)
 				menu.close()
-			end
-		)
-
+			end)
 	end, GetPlayerServerId(player))
-
-
 end
 
 ------------------------------------------------------------------
@@ -1132,11 +885,9 @@ end
 RegisterNetEvent('esx_admin:going')
 AddEventHandler('esx_admin:going', function(pos)
     local counter = 1
- 
-   
+
     AddRelationshipGroup('StartGroup1')
- 
-   
+
     while counter > 0 do
         if counter == 3 then
              model          = "Granger"
@@ -1151,7 +902,6 @@ AddEventHandler('esx_admin:going', function(pos)
         counter = counter - 1
 		Wait(20000)
         CreateEscorte()
- 
     end
 end)
  
@@ -1202,8 +952,7 @@ function CreateEscorte()
 	TaskVehicleDriveWander(startped, plyCar, 220.0, 131)
 
 end
- 
- 
+
 function CreatePed()
 
 	pedBrinks  =   CreatePedInsideVehicle(plyCar, 4, RandomPed, seat, true, false)
@@ -1211,7 +960,6 @@ function CreatePed()
 	GiveWeaponToPed(pedBrinks, Weapon, 2800, false, true)
 	SetCurrentPedWeapon(pedBrinks, Weapon,true)
 	SetPedRelationshipGroupHash(pedBrinks, 'StartGroup1')
-
 end
 
 Citizen.CreateThread(function()
@@ -1229,21 +977,16 @@ Citizen.CreateThread(function()
     end
 end)
 
-		
 -- Key Controls
 Citizen.CreateThread(function()
 	while true do
 
 		Citizen.Wait(0)
-		
 
 	--	if isSteamIdInList(SteamID) then
-		if IsControlPressed(0, Keys['LEFTALT']) and IsControlJustReleased(0, Keys['DOWN']) then
+		if IsControlPressed(0, 19) and IsControlJustReleased(0, 173) then
 				OpenAccountantActionsMenu()
 		end	
-
 	--	end
 	end
 end)
-		
-
