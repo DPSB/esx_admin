@@ -1,5 +1,5 @@
-# fxserver-esx_admin
-FXServer ESX Admin
+# esx_admin
+ESX Admin
 
 [INSTALLATION]
 
