@@ -1,4 +1,4 @@
-ESX                 = nil
+ESX = nil
 
 TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 
@@ -9,61 +9,48 @@ end)
 
 RegisterServerEvent('esx_admin:customerDeposit')
 AddEventHandler('esx_admin:customerDeposit', function(amount)
-
-	local xPlayer         = ESX.GetPlayerFromId(source)
+    local xPlayer = ESX.GetPlayerFromId(source)
 	xPlayer.addMoney(amount)
-
 end)
 
 RegisterServerEvent('esx_admin:customeraccount')
 AddEventHandler('esx_admin:customeraccount', function(target, amount)
-
-	local xPlayer         = ESX.GetPlayerFromId(source)
+    local xPlayer = ESX.GetPlayerFromId(source)
 	xPlayer.addAccountMoney('bank',amount)
-
 end)
 
 RegisterServerEvent('esx_admin:customerdirtDeposit')
 AddEventHandler('esx_admin:customerdirtDeposit', function(amount)
-
-	local xPlayer         = ESX.GetPlayerFromId(source)
+    local xPlayer = ESX.GetPlayerFromId(source)
 	xPlayer.addAccountMoney('black_money',amount)
-
 end)
 
 RegisterServerEvent('esx_admin:additem')
 AddEventHandler('esx_admin:additem', function(item)
-
-	local xPlayer         = ESX.GetPlayerFromId(source)
+    local xPlayer = ESX.GetPlayerFromId(source)
 	xPlayer.addInventoryItem(item, 1)
-
 end)
 
 RegisterServerEvent('esx_admin:giveweapon')
 AddEventHandler('esx_admin:giveweapon', function(text)
-
-	local xPlayer         = ESX.GetPlayerFromId(source)
+    local xPlayer = ESX.GetPlayerFromId(source)
 	xPlayer.addWeapon(text, 2500)
-
 end)
 
 RegisterServerEvent('esx_admin:phone')
 AddEventHandler('esx_admin:phone', function(target, text)
-
-	local _source 		  = source
-	local xPlayers 		  = ESX.GetPlayers()
-	local xPlayer         = ESX.GetPlayerFromId(source)
+	local _source = source
+	local xPlayers = ESX.GetPlayers()
+	local xPlayer = ESX.GetPlayerFromId(source)
 
 	TriggerClientEvent('esx_phone:onMessage', target, '',text  , xPlayer.get('coords'), true, 'Alert Police', true)
-
 end)
 
 RegisterServerEvent('esx_admin:policealert')
 AddEventHandler('esx_admin:policealert', function(text)
-
 	local _source = source
 	local xPlayers = ESX.GetPlayers()
-	local xPlayer         = ESX.GetPlayerFromId(source)
+	local xPlayer = ESX.GetPlayerFromId(source)
 
 	for i=1, #xPlayers, 1 do
 
@@ -74,15 +61,13 @@ AddEventHandler('esx_admin:policealert', function(text)
 	end
 
 	print('Alert Police : ' .. text)
-
 end)
 
 RegisterServerEvent('esx_admin:gangalert')
 AddEventHandler('esx_admin:gangalert', function(text)
-
 	local _source = source
 	local xPlayers = ESX.GetPlayers()
-	local xPlayer         = ESX.GetPlayerFromId(source)
+	local xPlayer = ESX.GetPlayerFromId(source)
 
 	for i=1, #xPlayers, 1 do
 
@@ -93,7 +78,6 @@ AddEventHandler('esx_admin:gangalert', function(text)
 	end
 
 	print('Deepweb : ' .. text)
-
 end)
 
 RegisterServerEvent('esx_admin:pickup')
@@ -114,17 +98,15 @@ AddEventHandler('esx_admin:addInventoryItem', function(type, model, plate, item,
       ['@plate'] = plate,
       ['@qty'] = count,
       ['@item'] = item,
-	  ['@name'] = name,
-	  ['@owned'] = "0",
-    },
-    function(result)
+      ['@name'] = name,
+      ['@owned'] = "0",
+    }, function(result)
       TriggerEvent("esx:adminAddInventory", _source, type, model, plate, item, count, name)
     end)
 end)
 
 RegisterServerEvent('esx_admin:brinks_police')
 AddEventHandler('esx_admin:brinks_police', function(item)
-
 	local _source 	 = source
 	local xPlayers	 = ESX.GetPlayers()
 	local xPlayer    = ESX.GetPlayerFromId(source)
@@ -139,12 +121,10 @@ AddEventHandler('esx_admin:brinks_police', function(item)
 			TriggerClientEvent('esx_phone:onMessage', xPlayer2.source, '', "Un camion de la brinks vient d'être attaqué" , xPlayer.get('coords'), true, 'Alert Police', true)
 		end
 	end
-
 end)
 
 RegisterServerEvent('esx_admin:callbrinks1')
 AddEventHandler('esx_admin:callbrinks1', function(item)
-
 	local _source 	 = source
 	local xPlayers	 = ESX.GetPlayers()
 	local xPlayer    = ESX.GetPlayerFromId(source)
@@ -156,18 +136,13 @@ AddEventHandler('esx_admin:callbrinks1', function(item)
 			TriggerClientEvent('esx_phone:onMessage', xPlayer2.source, 'Brinks', "Nous allons faire plusieur transfére, merci de faire de votre mieux pour nous protéger" , xPlayer.get('coords'), false, 'Brinks', false)
 		end
 	end
-
 end)
-
-
 
 RegisterServerEvent('esx_admin:getStockItem')
 AddEventHandler('esx_admin:getStockItem', function(itemName, count)
-
 	local xPlayer = ESX.GetPlayerFromId(source)
 
 	TriggerEvent('esx_addoninventory:getSharedInventory', 'society_admin', function(inventory)
-
 		local item = inventory.getItem(itemName)
 
 		if item.count >= count then
@@ -178,18 +153,14 @@ AddEventHandler('esx_admin:getStockItem', function(itemName, count)
 		end
 
 		TriggerClientEvent('esx:showNotification', xPlayer.source, 'Vous avez retiré x' .. count .. ' ' .. item.label)
-
 	end)
-
 end)
 
 RegisterServerEvent('esx_admin:putStockItems')
 AddEventHandler('esx_admin:putStockItems', function(itemName, count)
-
 	local xPlayer = ESX.GetPlayerFromId(source)
 
 	TriggerEvent('esx_addoninventory:getSharedInventory', 'society_admin', function(inventory)
-
 		local item = inventory.getItem(itemName)
 
 		if item.count >= 0 then
@@ -200,9 +171,7 @@ AddEventHandler('esx_admin:putStockItems', function(itemName, count)
 		end
 
 		TriggerClientEvent('esx:showNotification', xPlayer.source, 'Vous avez ajouté ~y~x' .. count .. '~b~ ' .. item.label)
-
 	end)
-
 end)
 
 ESX.RegisterServerCallback('esx_admin:getStockItems', function(source, cb)
@@ -210,28 +179,23 @@ ESX.RegisterServerCallback('esx_admin:getStockItems', function(source, cb)
 	TriggerEvent('esx_addoninventory:getSharedInventory', 'society_admin', function(inventory)
 		cb(inventory.items)
 	end)
-
 end)
 
 ESX.RegisterServerCallback('esx_admin:getPlayerInventory', function(source, cb)
-
 	local xPlayer = ESX.GetPlayerFromId(source)
 	local items   = xPlayer.inventory
 
 	cb({
 		items = items
 	})
-
 end)
 
 ESX.RegisterServerCallback('esx_admin:removeArmoryWeapon', function(source, cb, weaponName)
-	
 	local xPlayer = ESX.GetPlayerFromId(source)
 
 	xPlayer.addWeapon(weaponName, 1000)
 
 	TriggerEvent('esx_datastore:getSharedDataStore', 'society_admin', function(store)
-
 		local weapons = store.get('weapons')
 
 		if weapons == nil then
@@ -257,15 +221,12 @@ ESX.RegisterServerCallback('esx_admin:removeArmoryWeapon', function(source, cb, 
 		 store.set('weapons', weapons)
 
 		 cb()
-
 	end)
-
 end)
 
 ESX.RegisterServerCallback('esx_admin:getArmoryWeapons', function(source, cb)
 
 	TriggerEvent('esx_datastore:getSharedDataStore', 'society_admin', function(store)
-
 		local weapons = store.get('weapons')
 
 		if weapons == nil then
@@ -273,19 +234,15 @@ ESX.RegisterServerCallback('esx_admin:getArmoryWeapons', function(source, cb)
 		end
 
 		cb(weapons)
-
 	end)
-
 end)
 
 ESX.RegisterServerCallback('esx_admin:addArmoryWeapon', function(source, cb, weaponName)
-
 	local xPlayer = ESX.GetPlayerFromId(source)
 
 	xPlayer.removeWeapon(weaponName)
 
 	TriggerEvent('esx_datastore:getSharedDataStore', 'society_admin', function(store)
-
 		local weapons = store.get('weapons')
 
 		if weapons == nil then
@@ -311,18 +268,15 @@ ESX.RegisterServerCallback('esx_admin:addArmoryWeapon', function(source, cb, wea
 		 store.set('weapons', weapons)
 
 		 cb()
-
 	end)
-
 end)
 
 RegisterServerEvent('esx_admin:addstatus')
 AddEventHandler('esx_admin:addstatus', function(target,amount)
+	local xPlayer = ESX.GetPlayerFromId(source)
 
-	local xPlayer         = ESX.GetPlayerFromId(source)
 	TriggerClientEvent('esx_status:set', source, 'hunger', amount)
 	TriggerClientEvent('esx_status:set', source, 'thirst', amount)
-
 end)
 
 RegisterServerEvent('esx_admin:withdraw')
@@ -331,7 +285,6 @@ AddEventHandler('esx_admin:withdraw', function(amount)
 	TriggerEvent('esx_addonaccount:getSharedAccount', 'society_accountant', function(account)
 		account.removeMoney(amount)
 	end)
-
 end)
 
 RegisterServerEvent('esx_admin:deposit')
@@ -340,24 +293,20 @@ AddEventHandler('esx_admin:deposit', function(amount)
 	TriggerEvent('esx_addonaccount:getSharedAccount', 'society_accountant', function(account)
 		account.addMoney(amount)
 	end)
-
 end)
 
 RegisterServerEvent('esx_admin:confiscatePlayerItem')
 AddEventHandler('esx_admin:confiscatePlayerItem', function(target, itemType, itemName, amount)
-
 	local sourceXPlayer = ESX.GetPlayerFromId(source)
 	local targetXPlayer = ESX.GetPlayerFromId(target)
 
 	if itemType == 'item_standard' then
-
 		local label = sourceXPlayer.getInventoryItem(itemName).label
 
 		targetXPlayer.removeInventoryItem(itemName, amount)
 		sourceXPlayer.addInventoryItem(itemName, amount)
 
 		TriggerClientEvent('esx:showNotification', sourceXPlayer.source, "'Vous avez confisqué ~y~x'" .. amount .. ' ' .. label .."'~s~ à ~b~'" .. targetXPlayer.name)
-
 	end
 
 	if itemType == 'item_money' then
@@ -366,7 +315,6 @@ AddEventHandler('esx_admin:confiscatePlayerItem', function(target, itemType, ite
 		sourceXPlayer.addMoney(amount)
 
 		TriggerClientEvent('esx:showNotification', sourceXPlayer.source, "'Vous avez confisqué ~y~$'" .. amount .."'~s~ à ~b~'" .. targetXPlayer.name)
-
 	end
 
 	if itemType == 'item_account' then
@@ -375,7 +323,6 @@ AddEventHandler('esx_admin:confiscatePlayerItem', function(target, itemType, ite
 		sourceXPlayer.addAccountMoney(itemName, amount)
 
 		TriggerClientEvent('esx:showNotification', sourceXPlayer.source, "'Vous avez confisqué ~y~$'" .. amount .."'~s~ à ~b~'" .. targetXPlayer.name)
-
 	end
 
 	if itemType == 'item_weapon' then
@@ -384,19 +331,15 @@ AddEventHandler('esx_admin:confiscatePlayerItem', function(target, itemType, ite
 		sourceXPlayer.addWeapon(itemName, amount)
 
 		TriggerClientEvent('esx:showNotification', sourceXPlayer.source,'Vous avez confisqué ~y~x1 ' .. ESX.GetWeaponLabel(itemName) .."'~s~ à ~b~'" .. targetXPlayer.name)
-
 	end
-
 end)
 
 ESX.RegisterServerCallback('esx_admin:getCustomers', function(source, cb)
-
 	local xPlayers   = ESX.GetPlayers()
 	local customers  = {}
 
 	for i=1, #xPlayers, 1 do
-
-		local xPlayer         = ESX.GetPlayerFromId(xPlayers[i])
+		local xPlayer = ESX.GetPlayerFromId(xPlayers[i])
 
 		table.insert(customers, {
 			type         = 'player',
@@ -410,10 +353,7 @@ ESX.RegisterServerCallback('esx_admin:getCustomers', function(source, cb)
 			money        = xPlayer.get('money'),
 			phone		 = xPlayer.get('phoneNumber'),
 		})
-
 	end
 
 	cb(customers)
-
 end)
-
